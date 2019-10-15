@@ -1,0 +1,34 @@
+---
+title: "Dashbord"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gh)
+TOKEN <- "your github token here"
+org_name <- "MT5013-HT18"
+get_collaborator_count <- function(repo_name, org_name, .token = TOKEN){
+    gh(paste("GET /repos", org_name, repo_name, "collaborators", sep = "/"), .token = TOKEN) %>% 
+        length()
+}
+```
+
+```{r}
+gh("GET /orgs/MT5013-HT18/repos", .token = TOKEN, type = "private") %>% {
+  tibble(
+    name = map_chr(., "name"),
+    url = map_chr(., "html_url"),
+    open_issues_count = map_int(., "open_issues_count"),
+    updated = map_chr(., "updated_at") %>% as.POSIXct()
+  )
+} %>% filter(str_sub(name, 1, 2) == "HW") %>% 
+  mutate(collaborators = map_int(name, ~get_collaborator_count(.x, org_name, TOKEN))) %>% 
+  mutate(name = paste0("[", name, "](", url, ")")) %>% 
+  select(-url) %>% 
+  arrange(desc(updated)) %>% knitr::kable()
+
+```
+
+
