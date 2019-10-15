@@ -7,6 +7,18 @@ private <-  TRUE
 auto_init <-  TRUE
 .token <-  TOKEN
 
+init_student <- function(user_name, org_name, team_id){
+    # Add student to organisation
+    add_user_org(user_name, org_name)
+    # Add student to students team (for access to Class_files repo)
+    # find team id by e.g. gh("GET /orgs/MT5013-HT18/teams", .token = TOKEN)
+    add_user_team(user_name, team_id)
+    # Create homework repo for student
+    add_repo(paste0("HW_", user_name), org_name)
+    # Give student access to homework repo
+    add_user_repo(user_name, paste0("HW_", user_name), org_name)
+}
+
 add_repo <- function(repo_name, org_name, 
                      private = TRUE, 
                      auto_init = TRUE,
